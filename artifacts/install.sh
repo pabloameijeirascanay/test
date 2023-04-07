@@ -6,7 +6,6 @@ sudo apt-get update
 
 # Export variables
 export KUBECTL_VERSION="1.24/stable"
-export TEMPLATE_BASE_URL=""
 
 # Creating login message of the day (motd)
 tput setaf 1;echo "-----------------------------------------------------------------------------------------------------------------------------"
@@ -78,7 +77,7 @@ EOF
 
 sudo -u $ADMIN_USER_NAME kubectl create ns externaldns
 sudo -u $ADMIN_USER_NAME kubectl create secret generic azure-config-file --namespace externaldns --from-file azure.json
-envsubst < ${TEMPLATE_BASE_URL}artifacts/external-dns.yaml | kubectl apply -f -
+envsubst < ${TEMPLATE_BASE_URL}/external-dns.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
@@ -92,16 +91,16 @@ export CLIENT_ID=$(az aks show --name $AKS_NAME --resource-group $RESOURCE_GROUP
 az keyvault set-policy -n $AKS_NAME --secret-permissions get --spn $CLIENT_ID
 
 # Deploy a SecretProviderClass
-envsubst < ${TEMPLATE_BASE_URL}artifacts/secret-provider-class.yaml | kubectl apply -f -
+envsubst < ${TEMPLATE_BASE_URL}/secret-provider-class.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
 echo "Create the application..."
 
-envsubst < ${TEMPLATE_BASE_URL}artifacts/app.yaml | kubectl apply -f -
+envsubst < ${TEMPLATE_BASE_URL}/app.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
 echo "Create the ingress..."
 
-envsubst < ${TEMPLATE_BASE_URL}artifacts/ingress.yaml | kubectl apply -f -
+envsubst < ${TEMPLATE_BASE_URL}/ingress.yaml | kubectl apply -f -
