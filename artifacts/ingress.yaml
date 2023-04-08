@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - manu2.${AZURE_DNS_PRIVATE_ZONE}
+        - ${FQDN_BACKEND_POOL}
       secretName: ingress-tls-csi
   rules:
-  - host: manu2.${AZURE_DNS_PRIVATE_ZONE}
+  - host: ${FQDN_BACKEND_POOL}
     http:
       paths:
       - path: /

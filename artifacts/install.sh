@@ -73,24 +73,23 @@ echo ""
 echo "######################################################################################"
 echo "Use the Azure Key Vault Provider for Secrets Store CSI Driver..."
 
-az aks enable-addons --addons azure-keyvault-secrets-provider --name $AKS_NAME --resource-group $RESOURCE_GROUP
-
-export CLIENT_ID=$(az aks show --name $AKS_NAME --resource-group $RESOURCE_GROUP --query addonProfiles.azureKeyvaultSecretsProvider.identity.clientId -o tsv)
+export OBJECT_ID=$(az aks show --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAME --query addonProfiles.azureKeyvaultSecretsProvider.identity.objectId -o tsv)
 
 # set policy to access certs in your key vault
-az keyvault set-policy -n $AKS_NAME --secret-permissions get --spn $CLIENT_ID
+az keyvault set-policy -n $AKV_NAME --secret-permissions get --object-id $OBJECT_ID
 
 # Deploy a SecretProviderClass
-envsubst < ${TEMPLATE_BASE_URL}/secret-provider-class.yaml | kubectl apply -f -
+export CLIENT_ID=$(az aks show --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAME --query addonProfiles.azureKeyvaultSecretsProvider.identity.clientId -o tsv)
+envsubst < secret-provider-class.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
 echo "Create the application..."
 
-envsubst < ${TEMPLATE_BASE_URL}/app.yaml | kubectl apply -f -
+envsubst < app.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
 echo "Create the ingress..."
 
-envsubst < ${TEMPLATE_BASE_URL}/ingress.yaml | kubectl apply -f -
+envsubst < ingress.yaml | kubectl apply -f -
