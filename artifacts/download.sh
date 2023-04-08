@@ -2,10 +2,7 @@ exec >download.log
 exec 2>&1
 
 sudo apt-get update
-
-sudo sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/" /etc/ssh/sshd_config
-sudo adduser staginguser --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
-sudo echo "staginguser:Passw0rd" | sudo chpasswd
+sudo apt install rsync -y
 
 # Injecting environment variables from Azure deployment
 echo '#!/bin/bash' >> vars.sh
@@ -37,8 +34,7 @@ sed -i '12s/^/export DNS_PRIVATE_ZONE_RESOURCE_GROUP_NAME=/' vars.sh
 sed -i '13s/^/export TEMPLATE_BASE_URL=/' vars.sh
 sed -i '14s/^/export AKV_RESOURCE_GROUP_NAME=/' vars.sh
 
-chmod +x vars.sh 
-. ./vars.sh
+sudo mv vars.sh /etc/profile.d/vars.sh
 
 # Creating login message of the day (motd)
 sudo curl -o /etc/profile.d/welcomeKubeadm.sh ${TEMPLATE_BASE_URL}welcomeKubeadm.sh
