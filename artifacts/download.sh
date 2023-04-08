@@ -41,10 +41,12 @@ chmod +x vars.sh
 . ./vars.sh
 
 # Creating login message of the day (motd)
-sudo curl -o /home/$ADMIN_USER_NAME/install.sh ${TEMPLATE_BASE_URL}artifacts/install.sh
+sudo curl -o /etc/profile.d/welcomeKubeadm.sh ${TEMPLATE_BASE_URL}welcomeKubeadm.sh
 
-sudo chmod +x install.sh
+# Download install script
+sudo curl -o /home/$ADMIN_USER_NAME/install.sh ${TEMPLATE_BASE_URL}install.sh
+
+sudo chmod +x /home/$ADMIN_USER_NAME/install.sh
 
 # Syncing this script log to 'home/user/' directory for ease of troubleshooting
-sudo -u $ADMIN_USER_NAME mkdir -p /home/${ADMIN_USER_NAME}/
 while sleep 1; do sudo -s rsync -a /var/lib/waagent/custom-script/download/0/download.log /home/${ADMIN_USER_NAME}/download.log; done &
