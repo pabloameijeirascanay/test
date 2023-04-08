@@ -55,10 +55,10 @@ spec:
         args:
         - --source=service
         - --source=ingress
-        - --domain-filter=${AZURE_DNS_PRIVATE_ZONE}
+        - --domain-filter=${DNS_PRIVATE_ZONE_NAME}
         - --provider=azure-private-dns
-        - --azure-resource-group=${RESOURCE_GROUP}
-        - --azure-subscription-id=${SUBSCRIPTION}
+        - --azure-resource-group=${DNS_PRIVATE_ZONE_RESOURCE_GROUP_NAME}
+        - --azure-subscription-id=${SUBSCRIPTION_ID}
         - --policy=upsert-only
         - --log-level=debug
         volumeMounts:

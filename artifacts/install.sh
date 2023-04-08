@@ -9,12 +9,12 @@ export KUBECTL_VERSION="1.24/stable"
 
 # Installing Azure CLI & Azure Arc extensions
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+az -v
+echo ""
 
 echo "Log in to Azure"
 sudo -u $ADMIN_USER_NAME az login --service-principal --username $SPN_CLIENT_ID --password $SPN_CLIENT_SECRET --tenant $TENANT_ID
 export SUBSCRIPTION_ID=$(sudo -u $ADMIN_USER_NAME az account show --query id --output tsv)
-az -v
-echo ""
 
 # Installing kubectl
 sudo snap install kubectl --channel=$KUBECTL_VERSION --classic
@@ -44,14 +44,15 @@ sudo helm install nginx-ingress ingress-nginx/ingress-nginx \
 --set defaultBackend.nodeSelector."kubernetes\.io/os"=linux \
 --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-internal"="true" \
 --set controller.service.externalTrafficPolicy=Local \
---set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz
+--set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz \
+--kubeconfig /home/${ADMIN_USER_NAME}/.kube/config
 
 # Install ExternalDNS
 echo ""
 echo "######################################################################################"
 echo "Install ExternalDNS..." 
 
-export PRINCIPAL_ID=$(az aks show --resource-group $DNS_PRIVATE_ZONE_RESOURCE_GROUP_NAME --name $AKS_NAME --query "identityProfile.kubeletidentity.objectId" --output tsv)
+export PRINCIPAL_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP_NAME --name $AKS_NAME --query "identityProfile.kubeletidentity.objectId" --output tsv)
 export DNS_ID=$(az network private-dns zone show --name $DNS_PRIVATE_ZONE_NAME --resource-group $DNS_PRIVATE_ZONE_RESOURCE_GROUP_NAME --query "id" --output tsv)
 sudo -u $ADMIN_USER_NAME az role assignment create --role "Private DNS Zone Contributor" --assignee $PRINCIPAL_ID --scope $DNS_ID
 
@@ -66,7 +67,7 @@ EOF
 
 sudo -u $ADMIN_USER_NAME kubectl create ns externaldns
 sudo -u $ADMIN_USER_NAME kubectl create secret generic azure-config-file --namespace externaldns --from-file azure.json
-envsubst < ${TEMPLATE_BASE_URL}/external-dns.yaml | kubectl apply -f -
+envsubst < external-dns.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"

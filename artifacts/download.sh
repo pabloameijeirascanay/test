@@ -37,10 +37,11 @@ sed -i '14s/^/export AKV_RESOURCE_GROUP_NAME=/' vars.sh
 sudo mv vars.sh /etc/profile.d/vars.sh
 
 # Creating login message of the day (motd)
-sudo curl -o /etc/profile.d/welcomeKubeadm.sh ${TEMPLATE_BASE_URL}welcomeKubeadm.sh
+sudo curl -o /etc/profile.d/welcomeKubeadm.sh ${TEMPLATE_BASE_URL}welcome.sh
 
 # Download install script
 sudo curl -o /home/$ADMIN_USER_NAME/install.sh ${TEMPLATE_BASE_URL}install.sh
+sudo curl -o /home/$ADMIN_USER_NAME/external-dns.yaml ${TEMPLATE_BASE_URL}external-dns.yaml
 
 sudo chmod +x /home/$ADMIN_USER_NAME/install.sh
 
