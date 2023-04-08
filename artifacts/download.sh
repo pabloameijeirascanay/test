@@ -21,7 +21,6 @@ echo $TEMPLATE_BASE_URL:${12} | awk '{print substr($1,2); }' >> vars.sh
 echo $AKV_RESOURCE_GROUP_NAME:${13} | awk '{print substr($1,2); }' >> vars.sh 
 echo $FQDN_BACKEND_POOL:${14} | awk '{print substr($1,2); }' >> vars.sh 
 
-fqdnBackendPool
 sed -i '2s/^/export ADMIN_USER_NAME=/' vars.sh
 sed -i '3s/^/export SPN_CLIENT_ID=/' vars.sh
 sed -i '4s/^/export SPN_CLIENT_SECRET=/' vars.sh
@@ -37,10 +36,12 @@ sed -i '13s/^/export TEMPLATE_BASE_URL=/' vars.sh
 sed -i '14s/^/export AKV_RESOURCE_GROUP_NAME=/' vars.sh
 sed -i '15s/^/export FQDN_BACKEND_POOL=/' vars.sh
 
+chmod +x vars.sh
+. ./vars.sh
 sudo mv vars.sh /etc/profile.d/vars.sh
 
 # Creating login message of the day (motd)
-sudo curl -o /etc/profile.d/welcomeKubeadm.sh ${TEMPLATE_BASE_URL}welcome.sh
+sudo curl -o /etc/profile.d/welcome.sh ${TEMPLATE_BASE_URL}welcome.sh
 
 # Download install script
 sudo curl -o /home/$ADMIN_USER_NAME/install.sh ${TEMPLATE_BASE_URL}install.sh
