@@ -1,7 +1,4 @@
 #!/bin/bash
-exec >aks.log
-exec 2>&1
-
 sudo apt-get update
 
 # Export variables
@@ -33,7 +30,8 @@ az aks get-credentials --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAM
 # Install Nginx Ingress Controller
 echo ""
 echo "######################################################################################"
-echo "Install Nginx Ingress Controller..." 
+echo "## Install Nginx Ingress Controller...                                              ##" 
+echo "######################################################################################"
 
 sudo helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 sudo helm repo update
@@ -50,18 +48,21 @@ sudo helm install nginx-ingress ingress-nginx/ingress-nginx \
 # Install ExternalDNS
 echo ""
 echo "######################################################################################"
-echo "Install ExternalDNS..." 
+echo "## Install ExternalDNS...                                                           ##" 
+echo "######################################################################################"
 
+export CLIENT_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP_NAME --name $AKS_NAME --query "identityProfile.kubeletidentity.clientId" --output tsv)
 export PRINCIPAL_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP_NAME --name $AKS_NAME --query "identityProfile.kubeletidentity.objectId" --output tsv)
 export DNS_ID=$(az network private-dns zone show --name $DNS_PRIVATE_ZONE_NAME --resource-group $DNS_PRIVATE_ZONE_RESOURCE_GROUP_NAME --query "id" --output tsv)
-sudo -u $ADMIN_USER_NAME az role assignment create --role "Private DNS Zone Contributor" --assignee $PRINCIPAL_ID --scope $DNS_ID
+sudo -u $ADMIN_USER_NAME az role assignment create --role "Private DNS Zone Contributor" --assignee-object-id $PRINCIPAL_ID --assignee-principal-type ServicePrincipal --scope $DNS_ID
 
 cat <<-EOF > ./azure.json
 {
   "tenantId": "$TENANT_ID",
   "subscriptionId": "$SUBSCRIPTION_ID",
   "resourceGroup": "$DNS_PRIVATE_ZONE_RESOURCE_GROUP_NAME",
-  "useManagedIdentityExtension": true
+  "useManagedIdentityExtension": true,
+  "userAssignedIdentityID": "$CLIENT_ID"
 }
 EOF
 
@@ -71,12 +72,13 @@ envsubst < external-dns.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
-echo "Use the Azure Key Vault Provider for Secrets Store CSI Driver..."
+echo "## Use the Azure Key Vault Provider for Secrets Store CSI Driver...                 ##" 
+echo "######################################################################################"
 
-export OBJECT_ID=$(az aks show --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAME --query addonProfiles.azureKeyvaultSecretsProvider.identity.objectId -o tsv)
+export PRINCIPAL_ID=$(az aks show --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAME --query addonProfiles.azureKeyvaultSecretsProvider.identity.objectId -o tsv)
 
 # set policy to access certs in your key vault
-az keyvault set-policy -n $AKV_NAME --secret-permissions get --object-id $OBJECT_ID
+az keyvault set-policy -n $AKV_NAME --secret-permissions get --object-id $PRINCIPAL_ID
 
 # Deploy a SecretProviderClass
 export CLIENT_ID=$(az aks show --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAME --query addonProfiles.azureKeyvaultSecretsProvider.identity.clientId -o tsv)
@@ -84,12 +86,14 @@ envsubst < secret-provider-class.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
-echo "Create the application..."
+echo "## Create the application...                                                        ##" 
+echo "######################################################################################"
 
 envsubst < app.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
-echo "Create the ingress..."
+echo "## Create the ingress...                                                            ##" 
+echo "######################################################################################"
 
 envsubst < ingress.yaml | kubectl apply -f -
