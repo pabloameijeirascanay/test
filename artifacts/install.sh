@@ -8,8 +8,8 @@ export KUBECTL_VERSION="1.24/stable"
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 az -v
 echo ""
-
 echo "Log in to Azure"
+echo ""
 sudo -u $ADMIN_USER_NAME az login --service-principal --username $SPN_CLIENT_ID --password $SPN_CLIENT_SECRET --tenant $TENANT_ID
 export SUBSCRIPTION_ID=$(sudo -u $ADMIN_USER_NAME az account show --query id --output tsv)
 
@@ -32,6 +32,7 @@ echo ""
 echo "######################################################################################"
 echo "## Install Nginx Ingress Controller...                                              ##" 
 echo "######################################################################################"
+echo ""
 
 sudo helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 sudo helm repo update
@@ -50,7 +51,7 @@ echo ""
 echo "######################################################################################"
 echo "## Install ExternalDNS...                                                           ##" 
 echo "######################################################################################"
-
+echo ""
 export CLIENT_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP_NAME --name $AKS_NAME --query "identityProfile.kubeletidentity.clientId" --output tsv)
 export PRINCIPAL_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP_NAME --name $AKS_NAME --query "identityProfile.kubeletidentity.objectId" --output tsv)
 export DNS_ID=$(az network private-dns zone show --name $DNS_PRIVATE_ZONE_NAME --resource-group $DNS_PRIVATE_ZONE_RESOURCE_GROUP_NAME --query "id" --output tsv)
@@ -74,7 +75,7 @@ echo ""
 echo "######################################################################################"
 echo "## Use the Azure Key Vault Provider for Secrets Store CSI Driver...                 ##" 
 echo "######################################################################################"
-
+echo ""
 export PRINCIPAL_ID=$(az aks show --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAME --query addonProfiles.azureKeyvaultSecretsProvider.identity.objectId -o tsv)
 
 # set policy to access certs in your key vault
@@ -88,12 +89,12 @@ echo ""
 echo "######################################################################################"
 echo "## Create the application...                                                        ##" 
 echo "######################################################################################"
-
+echo ""
 envsubst < app.yaml | kubectl apply -f -
 
 echo ""
 echo "######################################################################################"
 echo "## Create the ingress...                                                            ##" 
 echo "######################################################################################"
-
+echo ""
 envsubst < ingress.yaml | kubectl apply -f -
