@@ -3,6 +3,7 @@ sudo apt-get update
 
 # restart the networking service
 sudo systemctl restart systemd-networkd
+sleep 10
 
 # Export variables
 export KUBECTL_VERSION="1.24/stable"
