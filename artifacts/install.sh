@@ -1,6 +1,9 @@
 #!/bin/bash
 sudo apt-get update
 
+# restart the networking service
+sudo systemctl restart systemd-networkd
+
 # Export variables
 export KUBECTL_VERSION="1.24/stable"
 
@@ -26,6 +29,14 @@ sudo mv envsubst /usr/local/bin
 
 # Get access credentials for a managed Kubernetes cluster
 az aks get-credentials --name $AKS_NAME --resource-group $AKS_RESOURCE_GROUP_NAME
+
+echo ""
+echo "######################################################################################"
+echo "## Disabling public access in Azure Key Vault...                                    ##" 
+echo "######################################################################################"
+echo ""
+
+az keyvault update --name $AKV_NAME --public-network-access Disabled
 
 # Install Nginx Ingress Controller
 echo ""
@@ -129,14 +140,6 @@ az keyvault set-policy -n $AKV_NAME --secret-permissions get --object-id $PRINCI
 
 # Deploy a SecretProviderClass
 envsubst < secret-provider-class.yaml | kubectl apply -f -
-
-echo ""
-echo "######################################################################################"
-echo "## Disabling public access in Azure Key Vault...                                    ##" 
-echo "######################################################################################"
-echo ""
-
-az keyvault update --name $AKV_NAME --public-network-access Disabled
 
 echo ""
 echo "######################################################################################"
