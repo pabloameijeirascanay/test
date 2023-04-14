@@ -135,7 +135,7 @@ echo "##########################################################################
 echo ""
 
 # set policy to access certs in your key vault
-export PRINCIPAL_ID=$(az identity show -g $AKS_RESOURCE_GROUP_NAME --name workload-identity --query 'objectId')
+export PRINCIPAL_ID=$(az identity show -g $AKS_RESOURCE_GROUP_NAME --name workload-identity --query 'principalId' -o tsv)
 az keyvault set-policy -n $AKV_NAME --secret-permissions get --object-id $PRINCIPAL_ID
 
 # Deploy a SecretProviderClass
