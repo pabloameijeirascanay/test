@@ -35,6 +35,10 @@ echo ""
 
 az keyvault update --name $AKV_NAME --public-network-access Disabled
 
+# restart the networking service
+sudo systemctl restart systemd-networkd
+sleep 10
+
 # Install Nginx Ingress Controller
 echo ""
 echo "######################################################################################"
