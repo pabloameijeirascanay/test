@@ -55,5 +55,9 @@ sudo curl -o /home/$ADMIN_USER_NAME/secret-provider-class.yaml ${TEMPLATE_BASE_U
 sudo curl -o /home/$ADMIN_USER_NAME/app.yaml ${TEMPLATE_BASE_URL}app.yaml
 sudo curl -o /home/$ADMIN_USER_NAME/ingress.yaml ${TEMPLATE_BASE_URL}ingress.yaml
 
+# restart the networking service
+sudo systemctl restart systemd-networkd
+sleep 10
+
 # Syncing this script log to 'home/user/' directory for ease of troubleshooting
 while sleep 1; do sudo -s rsync -a /var/lib/waagent/custom-script/download/0/download.log /home/${ADMIN_USER_NAME}/download.log; done &
