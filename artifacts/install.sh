@@ -1,10 +1,6 @@
 #!/bin/bash
 sudo apt-get update
 
-# restart the networking service
-sudo systemctl restart systemd-networkd
-sleep 10
-
 # Export variables
 export KUBECTL_VERSION="1.24/stable"
 
@@ -56,6 +52,7 @@ sudo helm install nginx-ingress ingress-nginx/ingress-nginx \
 --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-internal"="true" \
 --set controller.service.externalTrafficPolicy=Local \
 --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz \
+--set controller.service.loadBalancerIP=10.0.2.73 \
 --kubeconfig /home/${ADMIN_USER_NAME}/.kube/config
 
 # Install ExternalDNS
